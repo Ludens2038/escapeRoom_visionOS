@@ -22,6 +22,7 @@ struct ContentView: View {
         }
         .padding()
     }
+    
 }
 
 #Preview(windowStyle: .automatic) {
