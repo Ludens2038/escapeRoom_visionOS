@@ -40,8 +40,7 @@
       [
         "AF09ED6F-1707-48FD-8720-65B998362C09",
         "Root",
-        "Cube",
-        "Cube_3"
+        "Beaker"
       ],
       {
         "isExpanded" : true,
@@ -59,16 +58,9 @@
       },
       [
         "AF09ED6F-1707-48FD-8720-65B998362C09",
-        "Root"
-      ],
-      {
-        "isExpanded" : true,
-        "isLocked" : false
-      },
-      [
-        "AF09ED6F-1707-48FD-8720-65B998362C09",
         "Root",
-        "Cube"
+        "Cube",
+        "Cube_1"
       ],
       {
         "isExpanded" : true,
@@ -88,7 +80,15 @@
         "AF09ED6F-1707-48FD-8720-65B998362C09",
         "Root",
         "Cube",
-        "Cube_1"
+        "Cube_3"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "AF09ED6F-1707-48FD-8720-65B998362C09",
+        "Root"
       ],
       {
         "isExpanded" : true,
