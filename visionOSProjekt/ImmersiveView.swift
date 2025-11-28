@@ -11,51 +11,108 @@ struct ImmersiveView: View {
     var body: some View {
         RealityView { content in
             if let immersiveContentEntity = try? await Entity(named: "Immersive", in: realityKitContentBundle) {
-                if let beaker = immersiveContentEntity.findEntity(named: "Beaker") {
-                    beaker.components.set(ManipulationComponent())
+                
+                if let cubeRed = immersiveContentEntity.findEntity(named: "CubeRed") {
+                    cubeRed.components.set(ManipulationComponent())
                     
                     var manipulation = ManipulationComponent()
                     manipulation.releaseBehavior = .stay
-                    beaker.components.set(manipulation)
-                    
-                    // floor
-                    let floor = ModelEntity(
-                            mesh: .generatePlane(width: 1000, depth: 1000),
-                            materials: [OcclusionMaterial()]
-                        )
-                        floor.generateCollisionShapes(recursive: false)
-                        floor.components[PhysicsBodyComponent.self] = PhysicsBodyComponent(
-                            massProperties: .default,
-                            material: .default,
-                            mode: .static
-                        )
-                    immersiveContentEntity.addChild(floor)
+                    cubeRed.components.set(manipulation)
                     
                     //beaker
-                    if beaker.components[PhysicsBodyComponent.self] == nil {
-                        beaker.components[PhysicsBodyComponent.self] =
+                    if cubeRed.components[PhysicsBodyComponent.self] == nil {
+                        cubeRed.components[PhysicsBodyComponent.self] =
                         PhysicsBodyComponent(mode: .dynamic)
                     }
                     
                     willBegin = content.subscribe(
                         to: ManipulationEvents.WillBegin.self
                     ) { _ in
-                        if var body = beaker.components[PhysicsBodyComponent.self] {
+                        if var body = cubeRed.components[PhysicsBodyComponent.self] {
                             body.mode = .kinematic
-                            beaker.components[PhysicsBodyComponent.self] = body
+                            cubeRed.components[PhysicsBodyComponent.self] = body
                         }
                     }
                     
                     willRelease = content.subscribe(
                         to: ManipulationEvents.WillRelease.self
                     ) { _ in
-                        if var body = beaker.components[PhysicsBodyComponent.self] {
+                        if var body = cubeRed.components[PhysicsBodyComponent.self] {
                             body.mode = .dynamic
-                            beaker.components[PhysicsBodyComponent.self] = body
+                            cubeRed.components[PhysicsBodyComponent.self] = body
                         }
                     }
-                    content.add(immersiveContentEntity)
+                    content.add(immersiveContentEntity) //add scene to view
                 }
+                
+                
+                if let cubeYellow = immersiveContentEntity.findEntity(named: "CubeYellow") {
+                    cubeYellow.components.set(ManipulationComponent())
+                    
+                    var manipulation = ManipulationComponent()
+                    manipulation.releaseBehavior = .stay
+                    cubeYellow.components.set(manipulation)
+                    
+                    //beaker
+                    if cubeYellow.components[PhysicsBodyComponent.self] == nil {
+                        cubeYellow.components[PhysicsBodyComponent.self] =
+                        PhysicsBodyComponent(mode: .dynamic)
+                    }
+                    
+                    willBegin = content.subscribe(
+                        to: ManipulationEvents.WillBegin.self
+                    ) { _ in
+                        if var body = cubeYellow.components[PhysicsBodyComponent.self] {
+                            body.mode = .kinematic
+                            cubeYellow.components[PhysicsBodyComponent.self] = body
+                        }
+                    }
+                    
+                    willRelease = content.subscribe(
+                        to: ManipulationEvents.WillRelease.self
+                    ) { _ in
+                        if var body = cubeYellow.components[PhysicsBodyComponent.self] {
+                            body.mode = .dynamic
+                            cubeYellow.components[PhysicsBodyComponent.self] = body
+                        }
+                    }
+                    content.add(immersiveContentEntity) //add scene to view
+                }
+                
+                
+                if let cubeBlue = immersiveContentEntity.findEntity(named: "CubeBlue") {
+                    cubeBlue.components.set(ManipulationComponent())
+                    
+                    var manipulation = ManipulationComponent()
+                    manipulation.releaseBehavior = .stay
+                    cubeBlue.components.set(manipulation)
+                    
+                    //beaker
+                    if cubeBlue.components[PhysicsBodyComponent.self] == nil {
+                        cubeBlue.components[PhysicsBodyComponent.self] =
+                        PhysicsBodyComponent(mode: .dynamic)
+                    }
+                    
+                    willBegin = content.subscribe(
+                        to: ManipulationEvents.WillBegin.self
+                    ) { _ in
+                        if var body = cubeBlue.components[PhysicsBodyComponent.self] {
+                            body.mode = .kinematic
+                            cubeBlue.components[PhysicsBodyComponent.self] = body
+                        }
+                    }
+                    
+                    willRelease = content.subscribe(
+                        to: ManipulationEvents.WillRelease.self
+                    ) { _ in
+                        if var body = cubeBlue.components[PhysicsBodyComponent.self] {
+                            body.mode = .dynamic
+                            cubeBlue.components[PhysicsBodyComponent.self] = body
+                        }
+                    }
+                    content.add(immersiveContentEntity) //add scene to view
+                }
+                
             }
         }
     }
