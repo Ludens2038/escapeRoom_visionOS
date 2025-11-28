@@ -5,37 +5,41 @@ import Spatial
 
 struct ImmersiveView: View {
     @State private var startPosition: SIMD3<Float>? = nil
+    @State private var willBegin: EventSubscription? = nil
+    @State private var willRelease: EventSubscription? = nil
     
     var body: some View {
         RealityView { content in
             if let immersiveContentEntity = try? await Entity(named: "Immersive", in: realityKitContentBundle) {
-                content.add(immersiveContentEntity)
-            }
-        }
-        .gesture(
-            DragGesture()
-                .targetedToAnyEntity()
-                .onChanged { value in
-                    let entity = value.entity
-                    let t = value.translation
+                if let beaker = immersiveContentEntity.findEntity(named: "Beaker") {
+                    beaker.components.set(ManipulationComponent())
                     
-                    if startPosition == nil {
-                        startPosition = entity.position
+                    if beaker.components[PhysicsBodyComponent.self] == nil {
+                        beaker.components[PhysicsBodyComponent.self] =
+                        PhysicsBodyComponent(mode: .dynamic)
                     }
                     
-                    guard let start = startPosition else { return }
+                    willBegin = content.subscribe(
+                        to: ManipulationEvents.WillBegin.self
+                    ) { _ in
+                        if var body = beaker.components[PhysicsBodyComponent.self] {
+                            body.mode = .kinematic
+                            beaker.components[PhysicsBodyComponent.self] = body
+                        }
+                    }
                     
-                    let factor: Float = 0.001
-                    let newX = start.x + Float(t.width)  * factor
-                    let newZ = start.z + Float(-t.height) * factor
-                    
-                    entity.position.x = newX
-                    entity.position.z = newZ
+                    willRelease = content.subscribe(
+                        to: ManipulationEvents.WillRelease.self
+                    ) { _ in
+                        if var body = beaker.components[PhysicsBodyComponent.self] {
+                            body.mode = .dynamic
+                            beaker.components[PhysicsBodyComponent.self] = body
+                        }
+                    }
+                    content.add(immersiveContentEntity)
                 }
-                .onEnded { _ in
-                    startPosition = nil
-                }
-        )
+            }
+        }
     }
 }
 
