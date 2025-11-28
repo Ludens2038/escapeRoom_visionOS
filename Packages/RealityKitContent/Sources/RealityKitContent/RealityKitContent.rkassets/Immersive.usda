@@ -195,6 +195,8 @@ def Xform "Root"
 
             def RealityKitStruct "material"
             {
+                double dynamicFriction = 0.1
+                double staticFriction = 0.1
             }
         }
 
