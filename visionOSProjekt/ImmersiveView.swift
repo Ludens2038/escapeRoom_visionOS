@@ -4,119 +4,126 @@ import RealityKitContent
 import Spatial
 
 struct ImmersiveView: View {
-    @State private var startPosition: SIMD3<Float>? = nil
-    @State private var willBegin: EventSubscription? = nil
-    @State private var willRelease: EventSubscription? = nil
-    
+    @State private var subscriptions: [EventSubscription] = []
+
+    private let movableNames: Set<String> = ["CubeRed", "CubeYellow", "CubeBlue"]
+    private let fixedNames: Set<String>   = ["CubeSocketLeft", "CubeSocketRight"]
+
     var body: some View {
         RealityView { content in
-            if let immersiveContentEntity = try? await Entity(named: "Immersive", in: realityKitContentBundle) {
-                
-                if let cubeRed = immersiveContentEntity.findEntity(named: "CubeRed") {
-                    cubeRed.components.set(ManipulationComponent())
-                    
+            if let scene = try? await Entity(named: "Immersive", in: realityKitContentBundle) {
+                content.add(scene)
+
+                // 1) Fixe Würfel: static + Collision sicherstellen
+                for name in fixedNames {
+                    if let fixed = scene.findEntity(named: name) {
+                        ensureCollision(on: fixed)
+                        fixed.components.set(PhysicsBodyComponent(mode: .static))
+                    }
+                }
+
+                // 2) Bewegliche Würfel: Manipulation + dynamic + Collision + Collision-Subscribe
+                for name in movableNames {
+                    guard let cube = scene.findEntity(named: name) else { continue }
+
                     var manipulation = ManipulationComponent()
                     manipulation.releaseBehavior = .stay
-                    cubeRed.components.set(manipulation)
-                    
-                    //beaker
-                    if cubeRed.components[PhysicsBodyComponent.self] == nil {
-                        cubeRed.components[PhysicsBodyComponent.self] =
-                        PhysicsBodyComponent(mode: .dynamic)
+                    cube.components.set(manipulation)
+
+                    ensureCollision(on: cube)
+
+                    if cube.components[PhysicsBodyComponent.self] == nil {
+                        cube.components.set(PhysicsBodyComponent(mode: .dynamic))
                     }
-                    
-                    willBegin = content.subscribe(
-                        to: ManipulationEvents.WillBegin.self
-                    ) { _ in
-                        if var body = cubeRed.components[PhysicsBodyComponent.self] {
-                            body.mode = .kinematic
-                            cubeRed.components[PhysicsBodyComponent.self] = body
+
+                    // Manipulation -> kinematic während Griff, danach wieder dynamic
+                    subscriptions.append(
+                        content.subscribe(to: ManipulationEvents.WillBegin.self) { event in
+                            guard movableNames.contains(event.entity.name) else { return }
+                            Task { @MainActor in
+                                if var body = event.entity.components[PhysicsBodyComponent.self] {
+                                    body.mode = .kinematic
+                                    event.entity.components.set(body)
+                                }
+                            }
                         }
-                    }
-                    
-                    willRelease = content.subscribe(
-                        to: ManipulationEvents.WillRelease.self
-                    ) { _ in
-                        if var body = cubeRed.components[PhysicsBodyComponent.self] {
-                            body.mode = .dynamic
-                            cubeRed.components[PhysicsBodyComponent.self] = body
+                    )
+
+                    subscriptions.append(
+                        content.subscribe(to: ManipulationEvents.WillRelease.self) { event in
+                            guard movableNames.contains(event.entity.name) else { return }
+                            Task { @MainActor in
+                                if var body = event.entity.components[PhysicsBodyComponent.self] {
+                                    body.mode = .dynamic
+                                    event.entity.components.set(body)
+                                }
+                            }
                         }
-                    }
-                    content.add(immersiveContentEntity) //add scene to view
+                    )
+
+                    // Kollision -> Snap auf Position des fixen Würfels
+                    subscriptions.append(
+                        content.subscribe(to: CollisionEvents.Began.self, on: cube) { collision in
+                            let a = collision.entityA
+                            let b = collision.entityB
+
+                            // helper: "moving" nimmt Pose von "target" an
+                            @MainActor
+                            func snap(_ moving: Entity, to target: Entity) {
+                                // kurz kinematic, damit Physik nicht dagegen arbeitet
+                                if var body = moving.components[PhysicsBodyComponent.self] {
+                                    body.mode = .kinematic
+                                    moving.components.set(body)
+                                }
+
+                                let targetPos = target.position(relativeTo: nil)
+                                let targetOri = target.orientation(relativeTo: nil)
+
+                                moving.setPosition(targetPos, relativeTo: nil)
+                                moving.setOrientation(targetOri, relativeTo: nil)
+
+                                // Restgeschwindigkeit stoppen (falls vorhanden)
+                                if var motion = moving.components[PhysicsMotionComponent.self] {
+                                    motion.linearVelocity = .zero
+                                    motion.angularVelocity = .zero
+                                    moving.components.set(motion)
+                                }
+                            }
+
+                            Task { @MainActor in
+                                // Nur snap, wenn die Kollision gegen einen FIXEN Würfel passiert
+                                if movableNames.contains(a.name), fixedNames.contains(b.name) {
+                                    snap(a, to: b)
+                                } else if movableNames.contains(b.name), fixedNames.contains(a.name) {
+                                    snap(b, to: a)
+                                }
+                            }
+                        }
+                    )
                 }
-                
-                
-                if let cubeYellow = immersiveContentEntity.findEntity(named: "CubeYellow") {
-                    cubeYellow.components.set(ManipulationComponent())
-                    
-                    var manipulation = ManipulationComponent()
-                    manipulation.releaseBehavior = .stay
-                    cubeYellow.components.set(manipulation)
-                    
-                    //beaker
-                    if cubeYellow.components[PhysicsBodyComponent.self] == nil {
-                        cubeYellow.components[PhysicsBodyComponent.self] =
-                        PhysicsBodyComponent(mode: .dynamic)
-                    }
-                    
-                    willBegin = content.subscribe(
-                        to: ManipulationEvents.WillBegin.self
-                    ) { _ in
-                        if var body = cubeYellow.components[PhysicsBodyComponent.self] {
-                            body.mode = .kinematic
-                            cubeYellow.components[PhysicsBodyComponent.self] = body
-                        }
-                    }
-                    
-                    willRelease = content.subscribe(
-                        to: ManipulationEvents.WillRelease.self
-                    ) { _ in
-                        if var body = cubeYellow.components[PhysicsBodyComponent.self] {
-                            body.mode = .dynamic
-                            cubeYellow.components[PhysicsBodyComponent.self] = body
-                        }
-                    }
-                    content.add(immersiveContentEntity) //add scene to view
-                }
-                
-                
-                if let cubeBlue = immersiveContentEntity.findEntity(named: "CubeBlue") {
-                    cubeBlue.components.set(ManipulationComponent())
-                    
-                    var manipulation = ManipulationComponent()
-                    manipulation.releaseBehavior = .stay
-                    cubeBlue.components.set(manipulation)
-                    
-                    //beaker
-                    if cubeBlue.components[PhysicsBodyComponent.self] == nil {
-                        cubeBlue.components[PhysicsBodyComponent.self] =
-                        PhysicsBodyComponent(mode: .dynamic)
-                    }
-                    
-                    willBegin = content.subscribe(
-                        to: ManipulationEvents.WillBegin.self
-                    ) { _ in
-                        if var body = cubeBlue.components[PhysicsBodyComponent.self] {
-                            body.mode = .kinematic
-                            cubeBlue.components[PhysicsBodyComponent.self] = body
-                        }
-                    }
-                    
-                    willRelease = content.subscribe(
-                        to: ManipulationEvents.WillRelease.self
-                    ) { _ in
-                        if var body = cubeBlue.components[PhysicsBodyComponent.self] {
-                            body.mode = .dynamic
-                            cubeBlue.components[PhysicsBodyComponent.self] = body
-                        }
-                    }
-                    content.add(immersiveContentEntity) //add scene to view
-                }
-                
             }
         }
     }
+
+    /// Falls die Collision Shapes schon in Reality Composer Pro gesetzt sind, ist das optional.
+    private func ensureCollision(on entity: Entity) {
+        guard entity.components[CollisionComponent.self] == nil else { return }
+
+        // Größe aus Visual Bounds ableiten (Fallback: 10cm)
+        let bounds = entity.visualBounds(relativeTo: entity)
+        let e = bounds.extents
+        let size = SIMD3<Float>(
+            max(e.x, 0.1),
+            max(e.y, 0.1),
+            max(e.z, 0.1)
+        )
+
+        entity.components.set(
+            CollisionComponent(shapes: [.generateBox(size: size)])
+        )
+    }
 }
+
 
 #Preview(immersionStyle: .full) {
     ImmersiveView()
