@@ -7,15 +7,52 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		383E41BF2EEC16E90091D0FC /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 383E41BE2EEC16E90091D0FC /* WidgetKit.framework */; };
+		383E41C12EEC16E90091D0FC /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 383E41C02EEC16E90091D0FC /* SwiftUI.framework */; };
+		383E41CE2EEC16EB0091D0FC /* ClockExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 383E41BC2EEC16E90091D0FC /* ClockExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		474B208E2ED072D20042F8E8 /* RealityKitContent in Frameworks */ = {isa = PBXBuildFile; productRef = 474B208D2ED072D20042F8E8 /* RealityKitContent */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		383E41CC2EEC16EB0091D0FC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 474B20802ED072D10042F8E8 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 383E41BB2EEC16E90091D0FC;
+			remoteInfo = ClockExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		383E41D32EEC16EB0091D0FC /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				383E41CE2EEC16EB0091D0FC /* ClockExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		383E41BC2EEC16E90091D0FC /* ClockExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ClockExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		383E41BE2EEC16E90091D0FC /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		383E41C02EEC16E90091D0FC /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		474B20882ED072D10042F8E8 /* visionOSProjekt.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = visionOSProjekt.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		474B208C2ED072D20042F8E8 /* RealityKitContent */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = RealityKitContent; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		383E41D22EEC16EB0091D0FC /* Exceptions for "Clock" folder in "ClockExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 383E41BB2EEC16E90091D0FC /* ClockExtension */;
+		};
 		474B20982ED072D50042F8E8 /* Exceptions for "visionOSProjekt" folder in "visionOSProjekt" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -26,6 +63,14 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		383E41C22EEC16E90091D0FC /* Clock */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				383E41D22EEC16EB0091D0FC /* Exceptions for "Clock" folder in "ClockExtension" target */,
+			);
+			path = Clock;
+			sourceTree = "<group>";
+		};
 		474B208A2ED072D20042F8E8 /* visionOSProjekt */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -37,6 +82,15 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		383E41B92EEC16E90091D0FC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				383E41C12EEC16E90091D0FC /* SwiftUI.framework in Frameworks */,
+				383E41BF2EEC16E90091D0FC /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		474B20852ED072D10042F8E8 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -48,11 +102,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		383E41BD2EEC16E90091D0FC /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				383E41BE2EEC16E90091D0FC /* WidgetKit.framework */,
+				383E41C02EEC16E90091D0FC /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		474B207F2ED072D10042F8E8 = {
 			isa = PBXGroup;
 			children = (
 				474B208A2ED072D20042F8E8 /* visionOSProjekt */,
 				474B208B2ED072D20042F8E8 /* Packages */,
+				383E41C22EEC16E90091D0FC /* Clock */,
+				383E41BD2EEC16E90091D0FC /* Frameworks */,
 				474B20892ED072D10042F8E8 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -61,6 +126,7 @@
 			isa = PBXGroup;
 			children = (
 				474B20882ED072D10042F8E8 /* visionOSProjekt.app */,
+				383E41BC2EEC16E90091D0FC /* ClockExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -76,6 +142,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		383E41BB2EEC16E90091D0FC /* ClockExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 383E41CF2EEC16EB0091D0FC /* Build configuration list for PBXNativeTarget "ClockExtension" */;
+			buildPhases = (
+				383E41B82EEC16E90091D0FC /* Sources */,
+				383E41B92EEC16E90091D0FC /* Frameworks */,
+				383E41BA2EEC16E90091D0FC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				383E41C22EEC16E90091D0FC /* Clock */,
+			);
+			name = ClockExtension;
+			packageProductDependencies = (
+			);
+			productName = ClockExtension;
+			productReference = 383E41BC2EEC16E90091D0FC /* ClockExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		474B20872ED072D10042F8E8 /* visionOSProjekt */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 474B20992ED072D50042F8E8 /* Build configuration list for PBXNativeTarget "visionOSProjekt" */;
@@ -83,10 +171,12 @@
 				474B20842ED072D10042F8E8 /* Sources */,
 				474B20852ED072D10042F8E8 /* Frameworks */,
 				474B20862ED072D10042F8E8 /* Resources */,
+				383E41D32EEC16EB0091D0FC /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				383E41CD2EEC16EB0091D0FC /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				474B208A2ED072D20042F8E8 /* visionOSProjekt */,
@@ -106,9 +196,12 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2600;
+				LastSwiftUpdateCheck = 2610;
 				LastUpgradeCheck = 2610;
 				TargetAttributes = {
+					383E41BB2EEC16E90091D0FC = {
+						CreatedOnToolsVersion = 26.1.1;
+					};
 					474B20872ED072D10042F8E8 = {
 						CreatedOnToolsVersion = 26.0.1;
 					};
@@ -129,11 +222,19 @@
 			projectRoot = "";
 			targets = (
 				474B20872ED072D10042F8E8 /* visionOSProjekt */,
+				383E41BB2EEC16E90091D0FC /* ClockExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		383E41BA2EEC16E90091D0FC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		474B20862ED072D10042F8E8 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -144,6 +245,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		383E41B82EEC16E90091D0FC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		474B20842ED072D10042F8E8 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -153,7 +261,79 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		383E41CD2EEC16EB0091D0FC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 383E41BB2EEC16E90091D0FC /* ClockExtension */;
+			targetProxy = 383E41CC2EEC16EB0091D0FC /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		383E41D02EEC16EB0091D0FC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = V9H5R443ND;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Clock/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Clock;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = erbsensuppe.visionOSProjekt.Clock;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 7;
+				XROS_DEPLOYMENT_TARGET = 26.1;
+			};
+			name = Debug;
+		};
+		383E41D12EEC16EB0091D0FC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = V9H5R443ND;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Clock/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Clock;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = erbsensuppe.visionOSProjekt.Clock;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 7;
+				XROS_DEPLOYMENT_TARGET = 26.1;
+			};
+			name = Release;
+		};
 		474B209A2ED072D50042F8E8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -338,6 +518,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		383E41CF2EEC16EB0091D0FC /* Build configuration list for PBXNativeTarget "ClockExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				383E41D02EEC16EB0091D0FC /* Debug */,
+				383E41D12EEC16EB0091D0FC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		474B20832ED072D10042F8E8 /* Build configuration list for PBXProject "visionOSProjekt" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
