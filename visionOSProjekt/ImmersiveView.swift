@@ -2,19 +2,45 @@ import SwiftUI
 import RealityKit
 import RealityKitContent
 import Spatial
+import UIKit
+import ARKit
 
 struct ImmersiveView: View {
     @State private var subscriptions: [EventSubscription] = []
+    @StateObject private var handTracker = HandJointsTracker()
 
     private let movableNames: Set<String> = ["CubeRed", "CubeYellow", "CubeBlue"]
     private let fixedNames: Set<String>   = ["CubeSocketLeft", "CubeSocketRight"]
 
+    // Escape-Status
+    @State private var bluePlaced: Bool = false
+    @State private var yellowPlaced: Bool = false
+
+    // Persistent head anchor and text entity references
+    @State private var headAnchor: AnchorEntity? = nil
+    @State private var escapeTextEntity: ModelEntity? = nil
+
+    private let placementThreshold: Float = 0.03 // 3cm Toleranz
+
     var body: some View {
         RealityView { content in
+            
+            // 1) Joint-Entities anlegen (enablePhysics = true => Hände können dynamic bodies schieben)
+            handTracker.setupEntities(enablePhysics: true)
+            content.add(handTracker.rootEntity)
+
+            // 2) Hand Tracking starten
+            Task { await handTracker.start() }
+            
             if let scene = try? await Entity(named: "Immersive", in: realityKitContentBundle) {
                 content.add(scene)
 
-                // 1) Fixe Würfel: static + Collision sicherstellen
+                // Create and add a persistent head anchor once
+                let head = AnchorEntity(.head)
+                content.add(head)
+                headAnchor = head
+
+                // Fixe Würfel: static + Collision
                 for name in fixedNames {
                     if let fixed = scene.findEntity(named: name) {
                         ensureCollision(on: fixed)
@@ -22,7 +48,61 @@ struct ImmersiveView: View {
                     }
                 }
 
-                // 2) Bewegliche Würfel: Manipulation + dynamic + Collision + Collision-Subscribe
+                // Helper: Prüfen ob Cube nahe an einem Socket sitzt
+                @MainActor
+                func isPlaced(_ cubeName: String) -> Bool {
+                    guard let cube = scene.findEntity(named: cubeName) else { return false }
+                    let cubePos = cube.position(relativeTo: nil)
+
+                    for socketName in fixedNames {
+                        guard let socket = scene.findEntity(named: socketName) else { continue }
+                        let socketPos = socket.position(relativeTo: nil)
+                        if simd_distance(cubePos, socketPos) <= placementThreshold {
+                            return true
+                        }
+                    }
+                    return false
+                }
+
+                // Helper: State aktualisieren + "ecaped" Text ein-/ausblenden
+                @MainActor
+                func refreshPlacementAndEscape() async {
+                    bluePlaced = isPlaced("CubeBlue")
+                    yellowPlaced = isPlaced("CubeYellow")
+
+                    let bothPlaced = bluePlaced && yellowPlaced
+
+                    guard let headAnchor else { return }
+
+                    if bothPlaced {
+                        // Create text entity if needed and attach to headAnchor
+                        if escapeTextEntity == nil {
+                            try? await Task.sleep(nanoseconds: 500_000_000)
+                            let mesh = MeshResource.generateText(
+                                "ESCAPED",
+                                extrusionDepth: 0.01,
+                                font: .systemFont(ofSize: 0.12, weight: .bold),
+                                containerFrame: .zero,
+                                alignment: .center,
+                                lineBreakMode: .byWordWrapping
+                            )
+                            let material = SimpleMaterial(color: .white, isMetallic: false)
+                            let textEntity = ModelEntity(mesh: mesh, materials: [material])
+
+                            // 1m vor Head (negative Z)
+                            textEntity.position = SIMD3<Float>(-0.291, 0, -1.0)
+
+                            headAnchor.addChild(textEntity)
+                            escapeTextEntity = textEntity
+                        }
+                    } else {
+                        // Remove text entity if present
+                        escapeTextEntity?.removeFromParent()
+                        escapeTextEntity = nil
+                    }
+                }
+
+                // Bewegliche Würfel
                 for name in movableNames {
                     guard let cube = scene.findEntity(named: name) else { continue }
 
@@ -36,7 +116,7 @@ struct ImmersiveView: View {
                         cube.components.set(PhysicsBodyComponent(mode: .dynamic))
                     }
 
-                    // Manipulation -> kinematic während Griff, danach wieder dynamic
+                    // WillBegin -> kinematic
                     subscriptions.append(
                         content.subscribe(to: ManipulationEvents.WillBegin.self) { event in
                             guard movableNames.contains(event.entity.name) else { return }
@@ -49,6 +129,7 @@ struct ImmersiveView: View {
                         }
                     )
 
+                    // WillRelease -> dynamic + placement check
                     subscriptions.append(
                         content.subscribe(to: ManipulationEvents.WillRelease.self) { event in
                             guard movableNames.contains(event.entity.name) else { return }
@@ -57,20 +138,19 @@ struct ImmersiveView: View {
                                     body.mode = .dynamic
                                     event.entity.components.set(body)
                                 }
+                                await refreshPlacementAndEscape()
                             }
                         }
                     )
 
-                    // Kollision -> Snap auf Position des fixen Würfels
+                    // Kollision -> Snap + placement check
                     subscriptions.append(
                         content.subscribe(to: CollisionEvents.Began.self, on: cube) { collision in
                             let a = collision.entityA
                             let b = collision.entityB
 
-                            // helper: "moving" nimmt Pose von "target" an
                             @MainActor
                             func snap(_ moving: Entity, to target: Entity) {
-                                // kurz kinematic, damit Physik nicht dagegen arbeitet
                                 if var body = moving.components[PhysicsBodyComponent.self] {
                                     body.mode = .kinematic
                                     moving.components.set(body)
@@ -82,7 +162,6 @@ struct ImmersiveView: View {
                                 moving.setPosition(targetPos, relativeTo: nil)
                                 moving.setOrientation(targetOri, relativeTo: nil)
 
-                                // Restgeschwindigkeit stoppen (falls vorhanden)
                                 if var motion = moving.components[PhysicsMotionComponent.self] {
                                     motion.linearVelocity = .zero
                                     motion.angularVelocity = .zero
@@ -91,41 +170,32 @@ struct ImmersiveView: View {
                             }
 
                             Task { @MainActor in
-                                // Nur snap, wenn die Kollision gegen einen FIXEN Würfel passiert
                                 if movableNames.contains(a.name), fixedNames.contains(b.name) {
                                     snap(a, to: b)
                                 } else if movableNames.contains(b.name), fixedNames.contains(a.name) {
                                     snap(b, to: a)
                                 }
+                                await refreshPlacementAndEscape()
                             }
                         }
                     )
+                }
+
+                // Initialer Check (falls Szene schon korrekt startet)
+                Task { @MainActor in
+                    await refreshPlacementAndEscape()
                 }
             }
         }
     }
 
-    /// Falls die Collision Shapes schon in Reality Composer Pro gesetzt sind, ist das optional.
     private func ensureCollision(on entity: Entity) {
         guard entity.components[CollisionComponent.self] == nil else { return }
 
-        // Größe aus Visual Bounds ableiten (Fallback: 10cm)
         let bounds = entity.visualBounds(relativeTo: entity)
         let e = bounds.extents
-        let size = SIMD3<Float>(
-            max(e.x, 0.1),
-            max(e.y, 0.1),
-            max(e.z, 0.1)
-        )
+        let size = SIMD3<Float>(max(e.x, 0.1), max(e.y, 0.1), max(e.z, 0.1))
 
-        entity.components.set(
-            CollisionComponent(shapes: [.generateBox(size: size)])
-        )
+        entity.components.set(CollisionComponent(shapes: [.generateBox(size: size)]))
     }
-}
-
-
-#Preview(immersionStyle: .full) {
-    ImmersiveView()
-        .environment(AppModel())
 }
